@@ -1,0 +1,274 @@
+{
+  "hosting": [
+    {
+      "site": "polyworld-2f581-frontend",
+      "public": "public",
+      "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
+      "rewrites": [{ "source": "**", "destination": "/index.html" }]
+    }
+  ],
+  "headers": [
+    {
+      "source": "/api/**",
+      "headers": [{ "key": "Cache-Control", "value": "no-store" }]
+    }
+  ],
+  "rewrites": [
+    {
+      "source": "/api/device/createLoginToken",
+      "function": "createDeviceLoginToken"
+    },
+    {
+      "source": "/api/device/verifyToken",
+      "function": "verifyDeviceLoginToken"
+    },
+    { "source": "/device-login", "destination": "/device-login.html" },
+    {
+      "source": "/api/authenticateMetamask",
+      "function": {
+        "functionId": "authenticateMetamask",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/createEmberAgent",
+      "function": {
+        "functionId": "createEmberAgent",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/updateEmberVoice",
+      "function": {
+        "functionId": "updateEmberVoice",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/uploadAvatar",
+      "function": {
+        "functionId": "uploadAvatar",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/updateEmberIdentity",
+      "function": {
+        "functionId": "updateEmberIdentity",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/uploadEmberDescription",
+      "function": {
+        "functionId": "uploadEmberDescription",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/updateEmberWallet",
+      "function": {
+        "functionId": "updateEmberWallet",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/updateEmberPersona",
+      "function": {
+        "functionId": "updateEmberPersona",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/mintEmberNFT",
+      "function": {
+        "functionId": "mintEmberNFT",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/finalizeEmberTraining",
+      "function": {
+        "functionId": "finalizeEmberTraining",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/bridgeToken",
+      "function": { "functionId": "bridgeToken", "region": "us-central1" }
+    },
+    {
+      "source": "/api/buildApproveUsdtTx",
+      "function": {
+        "functionId": "buildApproveUsdtTx",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/burnToken",
+      "function": { "functionId": "burnToken", "region": "us-central1" }
+    },
+    {
+      "source": "/api/buyPoliFromUsdt",
+      "function": { "functionId": "buyPoliFromUsdt", "region": "us-central1" }
+    },
+    {
+      "source": "/api/chatHandler",
+      "function": { "functionId": "chatHandler", "region": "us-central1" }
+    },
+    {
+      "source": "/api/createEmber",
+      "function": { "functionId": "createEmber", "region": "us-central1" }
+    },
+    {
+      "source": "/api/createFlame",
+      "function": { "functionId": "createFlame", "region": "us-central1" }
+    },
+    {
+      "source": "/api/createSession",
+      "function": { "functionId": "createSession", "region": "us-central1" }
+    },
+    {
+      "source": "/api/createToken",
+      "function": { "functionId": "createToken", "region": "us-central1" }
+    },
+    {
+      "source": "/api/createTraveller",
+      "function": { "functionId": "createTraveller", "region": "us-central1" }
+    },
+    {
+      "source": "/api/deleteEmber",
+      "function": { "functionId": "deleteEmber", "region": "us-central1" }
+    },
+    {
+      "source": "/api/deleteFlame",
+      "function": { "functionId": "deleteFlame", "region": "us-central1" }
+    },
+    {
+      "source": "/api/deleteTraveller",
+      "function": { "functionId": "deleteTraveller", "region": "us-central1" }
+    },
+    {
+      "source": "/api/getAllEmbers",
+      "function": { "functionId": "getAllEmbers", "region": "us-central1" }
+    },
+    {
+      "source": "/api/getAllFlames",
+      "function": { "functionId": "getAllFlames", "region": "us-central1" }
+    },
+    {
+      "source": "/api/getAllSessionsByUser",
+      "function": {
+        "functionId": "getAllSessionsByUser",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/getAllTravellers",
+      "function": {
+        "functionId": "getAllTravellers",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/getEmberById",
+      "function": { "functionId": "getEmberById", "region": "us-central1" }
+    },
+    {
+      "source": "/api/getFlameById",
+      "function": { "functionId": "getFlameById", "region": "us-central1" }
+    },
+    {
+      "source": "/api/getPoliBalance",
+      "function": { "functionId": "getPoliBalance", "region": "us-central1" }
+    },
+    {
+      "source": "/api/getPoliRate",
+      "function": { "functionId": "getPoliRate", "region": "us-central1" }
+    },
+    {
+      "source": "/api/getPolistarBalance",
+      "function": {
+        "functionId": "getPolistarBalance",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/getSessionById",
+      "function": { "functionId": "getSessionById", "region": "us-central1" }
+    },
+    {
+      "source": "/api/getTravellerById",
+      "function": {
+        "functionId": "getTravellerById",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/getUsdtBalance",
+      "function": { "functionId": "getUsdtBalance", "region": "us-central1" }
+    },
+    {
+      "source": "/api/mergeUserSessions",
+      "function": {
+        "functionId": "mergeUserSessions",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/mintToken",
+      "function": { "functionId": "mintToken", "region": "us-central1" }
+    },
+    {
+      "source": "/api/rewardPolistar",
+      "function": { "functionId": "rewardPolistar", "region": "us-central1" }
+    },
+    {
+      "source": "/api/root",
+      "function": { "functionId": "root", "region": "us-central1" }
+    },
+    {
+      "source": "/api/seedAll",
+      "function": { "functionId": "seedAll", "region": "us-central1" }
+    },
+    {
+      "source": "/api/seedSystemConfig",
+      "function": {
+        "functionId": "seedSystemConfig",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/summarizeSession",
+      "function": {
+        "functionId": "summarizeSession",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/transferPolistar",
+      "function": {
+        "functionId": "transferPolistar",
+        "region": "us-central1"
+      }
+    },
+    {
+      "source": "/api/transferToken",
+      "function": { "functionId": "transferToken", "region": "us-central1" }
+    },
+    {
+      "source": "/api/updateEmber",
+      "function": { "functionId": "updateEmber", "region": "us-central1" }
+    },
+    {
+      "source": "/api/updateFlame",
+      "function": { "functionId": "updateFlame", "region": "us-central1" }
+    },
+    {
+      "source": "/api/updateTraveller",
+      "function": { "functionId": "updateTraveller", "region": "us-central1" }
+    },
+
+    { "source": "**", "destination": "/index.html" }
+  ]
+}

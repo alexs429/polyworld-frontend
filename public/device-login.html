@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Polyworld Device Login</title>
+  <style>
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: radial-gradient(ellipse at top left, #ffe8d2, #ffc8a0);
+      color: #222;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .card {
+      background: white;
+      padding: 28px 24px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+      max-width: 360px;
+      width: 100%;
+      text-align: center;
+    }
+    .card h1 {
+      font-size: 22px;
+      margin-bottom: 16px;
+    }
+    .status {
+      font-size: 16px;
+      margin-top: 12px;
+    }
+    .success {
+      color: green;
+    }
+    .error {
+      color: red;
+    }
+    .loader {
+      margin: 20px auto;
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #ff8c42;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>Connecting Device...</h1>
+    <div id="loader" class="loader"></div>
+    <div id="status" class="status"></div>
+  </div>
+
+  <script>
+    async function verifyToken(token) {
+      const res = await fetch(`/api/device/verifyToken?t=${token}`);
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      return res.json();
+    }
+
+    function getQueryParam(name) {
+      const url = new URL(window.location.href);
+      return url.searchParams.get(name);
+    }
+
+    async function run() {
+      const token = getQueryParam("t");
+      const loader = document.getElementById("loader");
+      const status = document.getElementById("status");
+
+      if (!token) {
+        loader.style.display = "none";
+        status.textContent = "Missing login token.";
+        status.className = "status error";
+        return;
+      }
+
+      try {
+        const { userId } = await verifyToken(token);
+        localStorage.setItem("pw_userId", userId); // or window.PW.userId = userId
+        loader.style.display = "none";
+        status.textContent = `✅ You are now logged in as ${userId}`;
+        status.className = "status success";
+
+        // Optional redirect after login
+        setTimeout(() => {
+          window.location.href = "/"; // or /app, /chat, etc.
+        }, 2000);
+      } catch (err) {
+        loader.style.display = "none";
+        status.textContent = `❌ ${err.message}`;
+        status.className = "status error";
+      }
+    }
+
+    run();
+  </script>
+</body>
+</html>

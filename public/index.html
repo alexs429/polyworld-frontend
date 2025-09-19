@@ -1,21 +1,274 @@
-<!doctype html>
-<html>
+<!DOCTYPE html>
+<html lang="en">
   <head>
-    <meta charset='utf-8' />
-    <meta name='viewport' content='width=device-width, initial-scale=1' />
-    <title>Polyworld</title>
-    <link rel='stylesheet' href='/styles.css' />
-    <script src='/config.js'></script>
-    <script type="module" src="/scripts/api.js"></script>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Welcome to Polyworld (c)</title>
+
+    <!-- External libs (load before app.js) -->
+    <script
+      src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"
+      defer
+    ></script>
+    <script
+      src="https://cdn.jsdelivr.net/npm/ethers@5.7.2/dist/ethers.umd.min.js"
+      defer
+    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcode-generator/1.4.4/qrcode.min.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
+
+    <!-- App CSS -->
+    <link rel="stylesheet" href="./css/styles.css" />
+
+    <!-- App entrypoint as ES module -->
+    <script type="module" src="/js/auth.js"></script>
+
+    <script type="module" src="./js/main.js"></script>
   </head>
   <body>
-    <div id='app'>
-      <h1>Polyworld Frontend</h1>
-      <button id='connectBtn'>Connect MetaMask</button>
-      <pre id='out'></pre>
+    <div class="backdrop"><div class="veil"></div></div>
+
+    <div
+      class="stage"
+      role="application"
+      aria-label="Polistar minimal interface"
+    >
+      <div class="row" aria-label="Two portraits">
+        <!-- Left: Polistar avatar -->
+        <div class="bubble" id="aiBubble">
+          <div class="title">Polistar</div>
+          <img
+            class="avatar-img"
+            id="activeAvatarImg"
+            alt="Polistar avatar"
+            src="images/bots/poly.png"
+          />
+          <div class="controls" id="voiceToggle">
+            <button
+              id="btnTTS"
+              class="icon-btn hud-tts"
+              aria-pressed="false"
+              title="Toggle voice output"
+            >
+              🔊
+            </button>
+          </div>
+        </div>
+
+        <!-- Right: Camera bubble (front/back flip) -->
+        <div class="bubble" id="camBubble" aria-live="polite">
+          <div class="title">You</div>
+          <div id="cameraBox" class="camera-box">
+            <div id="flipInner" class="flip-inner">
+              <!-- FRONT: camera + POLI chip -->
+              <div class="face front">
+                <video
+                  id="userCamera"
+                  autoplay
+                  muted
+                  playsinline
+                  class="camera-video"
+                ></video>
+                <div id="camFallback" class="cam-fallback" hidden>
+                  <div class="cam-fallback-inner">
+                    <div class="cam-note">
+                      Camera is off. Enable to appear here.
+                    </div>
+                    <button id="btnEnableCam" class="btn-cam">
+                      Enable camera
+                    </button>
+                  </div>
+                </div>
+                <div
+                  id="poliHud"
+                  class="cam-balance"
+                  role="button"
+                  title="Show balances"
+                >
+                  <img src="images/poli.jpg" alt="POLI" class="token-ico" />
+                  <span>POLI:</span>
+                  <span id="poliAmount" class="amount">-</span>
+                </div>
+              </div>
+              <!-- BACK: balance panel -->
+              <div class="face back" id="backFace">
+                <div class="balance-panel">
+                  <div class="panel-inner">
+                    <div class="badge">
+                      <img
+                        src="images/poli.jpg"
+                        alt="POLI"
+                        class="badge-icon"
+                      />
+                      <span class="badge-title">Balance</span>
+                    </div>
+                    <div class="addr" id="balAddr" title="Click to copy">
+                      0x…
+                    </div>
+                    <div class="rows">
+                      <div class="bal-row">
+                        <span>POLISTAR:</span
+                        ><strong id="balPolistar">-</strong>
+                      </div>
+                      <div class="bal-row">
+                        <span>POLI:</span><strong id="balPoli">-</strong>
+                      </div>
+                      <div class="bal-row">
+                        <span>USDT:</span><strong id="balUsdt">-</strong>
+                      </div>
+                    </div>
+                    <div class="divider"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Chat log -->
+      <div id="chatArea" class="chatlog" aria-live="polite"></div>
+
+      <!-- Composer + function sheet -->
+      <div class="composer-wrap" id="composerWrap">
+        <div class="status-line" id="statusLine">Waiting…</div>
+        <div class="composer" role="group" aria-label="Message composer">
+          <button id="btnPlus" class="btnGreen" title="Functions">＋</button>
+
+          <!-- Attach button (hidden by default) -->
+          <label id="attachWrapper" style="display: none">
+            <input
+              type="file"
+              id="emberFileUpload"
+              accept=".txt"
+              style="display: none"
+            />
+            <span class="btn" title="Attach file">📎</span>
+          </label>
+
+          <textarea
+            id="prompt"
+            rows="1"
+            placeholder="Type your message…"
+            autocomplete="off"
+          ></textarea>
+
+          <button id="btnMic" class="btn" aria-pressed="false" title="Speak">
+            🎙️
+          </button>
+          <button id="btnSend" class="btn" title="Send">➤</button>
+        </div>
+      </div>
+
+      <div id="dim" class="dim" aria-hidden="true"></div>
+      <div
+        id="funcSheet"
+        class="func-sheet"
+        role="dialog"
+        aria-label="Quick actions"
+      >
+        <div class="sheet-handle" aria-hidden="true"></div>
+
+        <div id="toolTray" class="pw-tool-tray">
+          <div class="pw-tool-item">
+            <button
+              class="pw-tool"
+              data-cmd="metamask"
+              aria-label="Connect MetaMask"
+            >
+              🦊
+            </button>
+            <span class="pw-tool-txt">MetaMask</span>
+          </div>
+          <div class="pw-tool-item">
+            <button class="pw-tool" data-cmd="buypoli" aria-label="Buy POLI">
+              🎫
+            </button>
+            <span class="pw-tool-txt">Buy POLI</span>
+          </div>
+          <div class="pw-tool-item">
+            <button
+              class="pw-tool"
+              data-cmd="buypolistar"
+              aria-label="Swap POLI"
+            >
+              🪙
+            </button>
+            <span class="pw-tool-txt">Swap POLI</span>
+          </div>
+          <div class="pw-tool-item">
+            <button
+              class="pw-tool"
+              data-cmd="transferpolistar"
+              aria-label="Transfer POLISTAR"
+            >
+              <!-- Gold transfer icon -->
+              <svg class="pw-ico" viewBox="0 0 24 24" aria-hidden="true">
+                <!-- coin -->
+                <circle cx="12" cy="12" r="9" fill="#F4B400" />
+                <!-- gold -->
+                <!-- top curved arrow -->
+                <path
+                  d="M7.5 12a4.8 4.8 0 0 1 7.5-3.7"
+                  fill="none"
+                  stroke="#7A4A00"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M14.6 8l.2-1.9 1.9.3"
+                  fill="none"
+                  stroke="#7A4A00"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+                <!-- bottom curved arrow -->
+                <path
+                  d="M16.5 12a4.8 4.8 0 0 1-7.5 3.7"
+                  fill="none"
+                  stroke="#7A4A00"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                />
+                <path
+                  d="M9.4 16l-.2 1.9-1.9-.3"
+                  fill="none"
+                  stroke="#7A4A00"
+                  stroke-width="1.8"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                />
+              </svg>
+            </button>
+            <span class="pw-tool-txt">Transfer</span>
+          </div>
+          <div class="pw-tool-item">
+            <button
+              class="pw-tool"
+              data-cmd="showembers"
+              aria-label="Choose an Ember"
+            >
+              ✨
+            </button>
+            <span class="pw-tool-txt">Embers</span>
+          </div>
+          <div class="pw-tool-item" id="toolMyEmbers">
+            <button
+              class="pw-tool"
+              data-cmd="showmyembers"
+              aria-label="My Embers"
+            >
+              🌱
+            </button>
+            <span class="pw-tool-txt">My Embers</span>
+          </div>
+        </div>
+      </div>
     </div>
-    <script src='/scripts/metamask.js'></script>
-    <script src='/scripts/api.js'></script>
-    <script src='/scripts/main.js'></script>
   </body>
 </html>

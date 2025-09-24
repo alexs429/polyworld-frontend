@@ -47,6 +47,8 @@ let currentEmber = null;
 let emberBurnInterval = null;
 let firstResponseSent = false;
 let _burnHooksBound = false;
+let trainingMode = null; // "classic" | "coach" | "coach-active"
+
 // Conversational action state
 let action = { mode: null, step: 0, payload: {}, prevPlaceholder: "" };
 let emberTraining = {
@@ -93,7 +95,7 @@ export async function startEmberTraining() {
         typeStatusMessage("✨ Raising your Ember — Focus");
         addMsg(
           "assistant",
-          "Great. Now type your Ember’s Focus (e.g. Travel, Finance, Personal)."
+          "Great. Please type your Ember’s Focus (e.g. Travel, Finance, Personal)."
         );
         setPromptHint("Focus (e.g. Travel, Finance, Personal)");
         return;
@@ -903,6 +905,14 @@ export function setupPrompt() {
       return;
     }
 
+    // --- Handle Coach flow ---
+    if (trainingMode === "coach" && t.toLowerCase() === "ready") {
+      trainingMode = "coach-active";
+      setCoachAvatarUI();
+      startCoachSession();
+      return;
+    }
+
     if (emberTraining.active) {
       // echo back Traveller input
       addMsg("user", t);
@@ -1452,6 +1462,43 @@ export function setupPrompt() {
     }
   }
 
+  function setCoachAvatarUI() {
+    const avatar = document.getElementById("activeAvatarImg");
+    if (avatar) {
+      avatar.src = "/images/coach.png";
+    }
+    window.dispatchEvent(
+      new CustomEvent("pw:set-voice", { detail: { voice: "MALE" } })
+    );
+  }
+
+  async function startCoachSession() {
+    addMsg(
+      "assistant",
+      "👨‍🏫 Hello, I am your Coach. Let's begin your training."
+    );
+    try {
+      const res = await fetch(ENDPOINTS.chatHandler, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          message: "ready",
+          sessionId:
+            window.currentWalletAddress || `guest-${crypto.randomUUID()}`,
+          agentId: window.POLYWORLD_CONFIG.COACH_AGENT_ID, // from config.js/.env
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (data.reply) {
+        addMsg("assistant", data.reply);
+        speakWithEmber(data.reply); // male voice already set
+      }
+    } catch (err) {
+      console.error("Coach start error", err);
+      addMsg("assistant", "❌ Could not start Coach session.");
+    }
+  }
+  
   async function handleFileUpload(file, emberId) {
     const content = await file.text(); // read as string
 

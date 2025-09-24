@@ -122,11 +122,16 @@ export async function showEmberPanel() {
   card.id = "emberListCard";
   card.className = "ember-card";
 
+  // Filter only embers that are public
+  const visibleEmbers = EMBERS.filter(
+    (e) => e.public === true || e._raw?.public === true
+  );
   card.innerHTML = `
       <div class="ember-card-head">Choose an Ember</div>
       <div class="ember-list">
-        ${EMBERS.map(
-          (e) => `
+        ${visibleEmbers
+          .map(
+            (e) => `
           <div class="ember-flip-card">
             <div class="ember-flip-inner" data-id="${e.id}">
               <div class="ember-face ember-front">
@@ -138,36 +143,56 @@ export async function showEmberPanel() {
               </div>
               <div class="ember-face ember-back">
                 ${
-                  e._raw?.nft?.hasOwnProperty("tokenId") &&
-                  !!e._raw?.nft?.contract
+                  e._raw?.nft?.status === "minted" && e._raw?.nft?.tokenId
                     ? `
-                    <div class="title">✅ True Ember</div>
-                    <div class="field" nowrap>Focus: ${e.name}</div>
-                    <div class="field">DOB: 20 Oct 1995</div>
-                    <div class="field">Trained by: You</div>
-                    <div class="field">ID Hash: ${
-                      e._raw?.identity?.identityHash || "—"
-                    }</div>
-                    <div class="qr"><canvas class="qrCanvas" data-url="https://sepolia.etherscan.io/token/${
-                      e._raw.nft.contract
-                    }?a=${e._raw.nft.tokenId}"></canvas></div>
-                    <div class="proof-link"><a href="https://sepolia.etherscan.io/token/${
-                      e._raw.nft.contract
-                    }?a=${
+                      <div class="title">✅ True Ember</div>
+                      <div class="field" nowrap>Name: ${e.name}</div>
+                      <div class="field">Standard: ${
+                        e._raw?.standard || "ERC-721"
+                      }</div>
+                      <div class="field">Trained by: ${
+                        e._raw?.trainingProgress?.trainedBy || "You"
+                      }</div>
+                      <div class="field">ID Hash: ${
+                        e._raw?.identity?.identityHash || "—"
+                      }</div>
+                      <div class="qr"><canvas class="qrCanvas" data-url="https://sepolia.etherscan.io/token/${
+                        e._raw.nft.contract
+                      }?a=${e._raw.nft.tokenId}"></canvas></div>
+                      <div class="proof-link"><a href="https://sepolia.etherscan.io/token/${
+                        e._raw.nft.contract
+                      }?a=${
                         e._raw.nft.tokenId
                       }" target="_blank">🔍 View on chain</a></div>
                     `
                     : `
-                    <div class="title">🕯️ Unminted Ember</div>
-                    <div class="field">This Ember has not yet been minted as an identity token.</div>
-                    <div class="field">You can still interact with them, but chain reference is not available.</div>
+                      <div class="title">🕯️ Unminted Ember</div>
+                      <div class="field">Focus: ${e.name}</div>
+                      <div class="field">Contract: ${
+                        e._raw?.nft?.contract || "—"
+                      }</div>
+                      <div class="field">Owner: ${
+                        e._raw?.nft?.owner || "—"
+                      }</div>
+                      <div class="field">Standard: ${
+                        e._raw?.nft?.standard || "—"
+                      }</div>
+                      <div class="field">Status: ${
+                        e._raw?.nft?.status || "not_minted"
+                      }</div>
+                      ${
+                        e._raw?.nft?.mintTx
+                          ? `<div class="proof-link"><a href="https://sepolia.etherscan.io/tx/${e._raw.nft.mintTx}" target="_blank">🔍 Mint Transaction</a></div>`
+                          : ""
+                      }
                     `
                 }
               </div>
             </div>
           </div>
         `
-        ).join("")}
+          )
+          .join("")}
       </div>
   `;
 
@@ -186,7 +211,7 @@ export async function showEmberPanel() {
       if (typeof _onSelect === "function") {
         const ember = EMBERS.find((x) => x.id === id) || null;
         _activeRaw = ember?._raw || null;
-        console.log("Active Raw:",_activeRaw);
+        console.log("Active Raw:", _activeRaw);
         _onSelect(id, _activeRaw);
       }
       return;
@@ -462,10 +487,27 @@ export async function showMyEmberPanel(uid) {
     const isTraining = flipCard.dataset.training === "true";
 
     if (isNew) {
-      card.remove();
-      startEmberTraining();
-      enterEmberTrainingMode();
-      return;
+      //card.remove();
+      //startEmberTraining();
+      //enterEmberTrainingMode();
+      //return;
+      if (isNew) {
+        card.remove();
+        if (window.USE_COACH_FLOW) {
+          trainingMode = "coach";
+          restorePolistarUI();
+          speakWithPolistar(
+            "✨ We will begin the process of Ember training now. I will pass the stage to my colleague – Coach – who will ask you a few questions. Please say READY when you are ready to begin."
+          );
+          addMsg("assistant", "Please type READY when you are ready to begin.");
+          setPromptHint("Type READY");
+        } else {
+          trainingMode = "classic";
+          startEmberTraining();
+          enterEmberTrainingMode();
+        }
+        return;
+      }
     }
     if (isTraining) {
       const ember = embers.find((x) => x.id === id);
